@@ -29,5 +29,6 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.GITHUB_TOKEN }}
-        repository_url: https://maven.pkg.github.com/${{ github.repository }}
-        skip_existing: true
+        repository-url: https://pypi.pkg.github.com/${{ github.repository }}
+        skip-existing: true
+        verbose: true
