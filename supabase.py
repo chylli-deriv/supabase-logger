@@ -26,7 +26,7 @@ class SupabaseLogger(SupabaseClient):
     # Singleton instance
     _instance = None
     
-    def __new__(cls):
+    def __new__(cls, *args, **kwargs):
         """Ensure only one instance of SupabaseLogger exists"""
         if cls._instance is None:
             # Create a new instance if one doesn't exist yet
@@ -35,21 +35,35 @@ class SupabaseLogger(SupabaseClient):
             cls._instance._initialized = False
         return cls._instance
     
-    def __init__(self):
+    def __init__(self, url=None, api_key=None, auth_email=None, auth_password=None, environment=None):
         """Initialize Supabase logger with context information
+        
+        Args:
+            url: Supabase URL (falls back to SUPABASE_URL environment variable)
+            api_key: Supabase API key (falls back to SUPABASE_API_KEY environment variable)
+            auth_email: Supabase auth email (falls back to SUPABASE_AUTH_EMAIL environment variable)
+            auth_password: Supabase auth password (falls back to SUPABASE_AUTH_PASSWORD environment variable)
+            environment: Environment name (falls back to ENVIRONMENT environment variable)
         
         This method will only perform initialization once for the singleton instance,
         even if called multiple times.
         """
         # Only initialize once to avoid re-establishing connections
         if not getattr(self, '_initialized', False):
-            # Initialize the base class with Supabase logger specific environment variables
+            # Get values from parameters or fall back to environment variables
+            url = url or os.environ.get('SUPABASE_URL')
+            api_key = api_key or os.environ.get('SUPABASE_API_KEY')
+            auth_email = auth_email or os.environ.get('SUPABASE_AUTH_EMAIL')
+            auth_password = auth_password or os.environ.get('SUPABASE_AUTH_PASSWORD')
+            environment = environment or os.environ.get('ENVIRONMENT')
+            
+            # Initialize the base class with the values
             super().__init__(
-                url=os.environ.get('SUPABASE_URL'),
-                api_key=os.environ.get('SUPABASE_API_KEY'),
-                auth_email=os.environ.get('SUPABASE_AUTH_EMAIL'),
-                auth_password=os.environ.get('SUPABASE_AUTH_PASSWORD'),
-                environment=os.environ.get('ENVIRONMENT')
+                url=url,
+                api_key=api_key,
+                auth_email=auth_email,
+                auth_password=auth_password,
+                environment=environment
             )
             
             # Set instance-specific attributes

@@ -63,6 +63,9 @@ class TestSupabaseLogger(unittest.TestCase):
         os.environ['SUPABASE_AUTH_EMAIL'] = 'test@example.com'
         os.environ['SUPABASE_AUTH_PASSWORD'] = 'test-password'
         os.environ['ENVIRONMENT'] = 'test'
+        
+        # Reset the singleton instance before each test
+        SupabaseLogger._instance = None
     
     def test_singleton(self):
         """Test that SupabaseLogger implements the Singleton pattern."""
@@ -71,6 +74,42 @@ class TestSupabaseLogger(unittest.TestCase):
         
         # Verify that both instances are the same object
         self.assertIs(logger1, logger2)
+    
+    def test_parameters_precedence(self):
+        """Test that constructor parameters take precedence over environment variables."""
+        # Create logger with explicit parameters
+        logger = SupabaseLogger(
+            url='https://param-url.supabase.co',
+            api_key='param-api-key',
+            auth_email='param@example.com',
+            auth_password='param-password',
+            environment='param-env'
+        )
+        
+        # Verify that the parameters were used instead of environment variables
+        self.assertEqual(logger.url, 'https://param-url.supabase.co')
+        self.assertEqual(logger.api_key, 'param-api-key')
+        self.assertEqual(logger.auth_email, 'param@example.com')
+        self.assertEqual(logger.auth_password, 'param-password')
+        self.assertEqual(logger.environment, 'param-env')
+    
+    def test_partial_parameters(self):
+        """Test that constructor can handle partial parameters, falling back to environment variables."""
+        # Create logger with only some parameters
+        logger = SupabaseLogger(
+            url='https://param-url.supabase.co',
+            api_key='param-api-key'
+            # Other parameters not provided, should fall back to environment variables
+        )
+        
+        # Verify that provided parameters were used
+        self.assertEqual(logger.url, 'https://param-url.supabase.co')
+        self.assertEqual(logger.api_key, 'param-api-key')
+        
+        # Verify that missing parameters fell back to environment variables
+        self.assertEqual(logger.auth_email, 'test@example.com')
+        self.assertEqual(logger.auth_password, 'test-password')
+        self.assertEqual(logger.environment, 'test')
     
     @patch('requests.post')
     def test_log_success(self, mock_post):
