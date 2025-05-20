@@ -110,6 +110,60 @@ class TestSupabaseLogger(unittest.TestCase):
         self.assertEqual(logger.auth_email, 'test@example.com')
         self.assertEqual(logger.auth_password, 'test-password')
         self.assertEqual(logger.environment, 'test')
+        
+        # Verify that logging is enabled since all required parameters are set
+        self.assertTrue(logger.enabled)
+    
+    def test_missing_parameters(self):
+        """Test that logger disables logging when required parameters are missing."""
+        # Clear environment variables
+        for var in ['SUPABASE_URL', 'SUPABASE_API_KEY', 'SUPABASE_AUTH_EMAIL', 'SUPABASE_AUTH_PASSWORD']:
+            if var in os.environ:
+                del os.environ[var]
+        
+        # Create logger with missing parameters
+        logger = SupabaseLogger()
+        
+        # Verify that logging is disabled
+        self.assertFalse(logger.enabled)
+        
+        # Verify that url, api_key, auth_email, and auth_password are None
+        self.assertIsNone(logger.url)
+        self.assertIsNone(logger.api_key)
+        self.assertIsNone(logger.auth_email)
+        self.assertIsNone(logger.auth_password)
+    
+    @patch('requests.post')
+    def test_disabled_logging(self, mock_post):
+        """Test that log_success doesn't make API calls when logging is disabled."""
+        # Create logger with missing parameters (which will disable logging)
+        for var in ['SUPABASE_URL', 'SUPABASE_API_KEY', 'SUPABASE_AUTH_EMAIL', 'SUPABASE_AUTH_PASSWORD']:
+            if var in os.environ:
+                del os.environ[var]
+        
+        logger = SupabaseLogger()
+        self.assertFalse(logger.enabled)
+        
+        # Test times
+        request_time = datetime.now(timezone.utc) - timedelta(seconds=1)
+        response_time = datetime.now(timezone.utc)
+        
+        # Log a bot response (should not make any API calls)
+        logger.log_success(
+            user_id="test-user",
+            channel_id="test-channel",
+            thread_id="test-thread",
+            user_message="test message",
+            response_text="test response",
+            request_time=request_time,
+            response_time=response_time,
+            bot_id="test-bot",
+            bot_name="Test Bot",
+            system_prompt="test prompt"
+        )
+        
+        # Verify that no API calls were made
+        mock_post.assert_not_called()
     
     @patch('requests.post')
     def test_log_success(self, mock_post):

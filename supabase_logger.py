@@ -57,6 +57,21 @@ class SupabaseLogger(SupabaseClient):
             auth_password = auth_password or os.environ.get('SUPABASE_AUTH_PASSWORD')
             environment = environment or os.environ.get('ENVIRONMENT')
             
+            # Check if required parameters have values
+            missing_params = []
+            if not url:
+                missing_params.append("URL")
+                logger.warning("Supabase URL is not set")
+            if not api_key:
+                missing_params.append("API Key")
+                logger.warning("Supabase API Key is not set")
+            if not auth_email:
+                missing_params.append("Auth Email")
+                logger.warning("Supabase Auth Email is not set")
+            if not auth_password:
+                missing_params.append("Auth Password")
+                logger.warning("Supabase Auth Password is not set")
+            
             # Initialize the base class with the values
             super().__init__(
                 url=url,
@@ -72,7 +87,15 @@ class SupabaseLogger(SupabaseClient):
             self.thread_id = None
             self.bot_id = None
             self.bot_name = None
-            self.enabled = True  # By default, logging is enabled
+            
+            # Set enabled flag based on parameter validation
+            if missing_params:
+                logger.warning(f"Supabase Logger initialization missing required parameters: {', '.join(missing_params)}")
+                logger.warning("Logging will be disabled")
+                self.enabled = False
+            else:
+                logger.info("All required Supabase parameters are set")
+                self.enabled = True  # Enable logging only if all parameters are set
             
             # Mark as initialized to prevent re-initialization
             self._initialized = True
