@@ -4,9 +4,63 @@ A Python package for logging AI bot responses to Supabase.
 
 ## Installation
 
-You can install the package directly from the repository:
+There are several ways to install the package:
+
+### Direct Installation from GitHub
 
 ```bash
+# Install the latest version
+pip install git+https://github.com/chylli-deriv/supabase-logger.git
+
+# Install a specific tag/version
+pip install git+https://github.com/chylli-deriv/supabase-logger.git@v0.1.0
+
+# Install a specific branch
+pip install git+https://github.com/chylli-deriv/supabase-logger.git@main
+```
+
+### Using requirements.txt
+
+Create a `requirements.txt` file with:
+
+```
+git+https://github.com/chylli-deriv/supabase-logger.git@v0.1.0
+```
+
+Then install with:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Using pyproject.toml (Poetry)
+
+If you're using Poetry, add this to your `pyproject.toml`:
+
+```toml
+[tool.poetry.dependencies]
+python = ">=3.11"
+supabase-logger = {git = "https://github.com/chylli-deriv/supabase-logger.git", rev = "v0.1.0"}
+```
+
+Then install with:
+
+```bash
+poetry install
+```
+
+### Local Development Installation
+
+If you've cloned the repository locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/chylli-deriv/supabase-logger.git
+
+# Navigate to the directory
+cd supabase-logger
+
+# Install in development mode
 pip install -e .
 ```
 
